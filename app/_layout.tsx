@@ -1,7 +1,14 @@
+// ===== MUST BE FIRST =====
+import "react-native-get-random-values";
+import "react-native-url-polyfill/auto";
+
+// normal imports below
 import { PrivyProvider } from "@privy-io/expo";
 import { Slot } from "expo-router";
 import { StyleSheet, Text, View } from "react-native";
 import { monadTestnet } from "viem/chains";
+import { ThemeProvider } from "@/constants/ThemeProvider";
+
 
 export default function DemoLayout() {
   if (
@@ -21,7 +28,9 @@ export default function DemoLayout() {
           },
         }}
       >
-        <Slot />
+        <ThemeProvider>
+          <Slot />
+        </ThemeProvider>
       </PrivyProvider>
     );
   }

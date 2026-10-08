@@ -2,25 +2,38 @@ const { getDefaultConfig } = require("expo/metro-config");
 
 const config = getDefaultConfig(__dirname);
 
-const resolveRequestWithPackageExports = (context, moduleName, platform) => {
-    if (moduleName === "jose") {
-        const ctx = {
-            ...context,
-            unstable_conditionNames: ["browser"],
-        };
-        return ctx.resolveRequest(ctx, moduleName, platform);
-    }
-
-    if (moduleName.startsWith("@privy-io/")) {
-        const ctx = {
-            ...context,
-            unstable_enablePackageExports: true,
-        };
-        return ctx.resolveRequest(ctx, moduleName, platform);
-    }
-
-    return context.resolveRequest(context, moduleName, platform);
+// ✅ Add Node polyfills
+config.resolver.extraNodeModules = {
+  crypto: require.resolve("react-native-get-random-values"),
+  buffer: require.resolve("buffer"),
+  process: require.resolve("process"),
 };
 
-config.resolver.resolveRequest = resolveRequestWithPackageExports;
+// ✅ Safe resolver override (no originalResolveRequest usage)
+config.resolver.resolveRequest = (context, moduleName, platform) => {
+  if (moduleName === "jose") {
+    return context.resolveRequest(
+      {
+        ...context,
+        unstable_conditionNames: ["browser"],
+      },
+      moduleName,
+      platform
+    );
+  }
+
+  if (moduleName.startsWith("@privy-io/")) {
+    return context.resolveRequest(
+      {
+        ...context,
+        unstable_enablePackageExports: true,
+      },
+      moduleName,
+      platform
+    );
+  }
+
+  return context.resolveRequest(context, moduleName, platform);
+};
+
 module.exports = config;
